@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "sudoku-game"
+version = "0.1.0"
+description = ""
+authors = ["Adrjan <43217550+AardJan@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
