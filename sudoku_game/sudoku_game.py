@@ -1,4 +1,6 @@
 import tkinter as tk
+import tkinter.filedialog as fd
+import json
 import numpy as np
 
 # from solve_algorithm import solve
@@ -51,7 +53,7 @@ def disable_board():
     for x in test_f:
         x.config(state="disabled")
     global grid
-    grid = ge_board_val_to_array(test_f)
+    grid = get_board_val_to_array(test_f)
     print(grid)
     solve()
 
@@ -63,10 +65,27 @@ def validate(x):
         return False
 
 
-def ge_board_val_to_array(entry_list):
+def get_board_val_to_array(entry_list):
     _l = [int(x.get()) if x.get() else 0 for x in entry_list]
     arr = [x.tolist() for x in np.array_split(np.array(_l), BOARD_DIM)]
     return arr
+
+
+def export_board(filename):
+    pass
+
+
+def import_board():
+    # file type
+    filetypes = (("text files", "*.json"), ("All files", "*.*"))
+    # show the open file dialog
+    f = fd.askopenfile(filetypes=filetypes)
+    # read the text file and show its content on the Text
+    board = json.loads(f.read())
+    flatList = [item for elem in board for item in elem]
+    flatList_str = [str(x) if x != 0 else "" for x in flatList]
+    for i, x in enumerate(test_f, start=0):
+        x.insert(0, flatList_str[i])
 
 
 window = tk.Tk()
@@ -77,6 +96,9 @@ frm_sudoku_board = tk.Frame(master=window)
 frm_btns = tk.Frame(master=window)
 btn_clean = tk.Button(master=frm_btns, text="Clean", command=clean_board)
 btn_disable = tk.Button(master=frm_btns, text="Disable", command=disable_board)
+btn_open_file = tk.Button(
+    master=frm_btns, text="Open file", command=import_board
+)
 
 for i in range(BOARD_DIM):
     frm_sudoku_board.columnconfigure(i, weight=1, minsize=1)
@@ -97,5 +119,6 @@ frm_btns.grid(row=0, column=0)
 frm_sudoku_board.grid(row=0, column=1, padx=5, pady=5)
 btn_clean.grid(row=0, column=0, sticky="nsew")
 btn_disable.grid(row=1, column=0, sticky="nsew")
+btn_open_file.grid(row=2, column=0, sticky="nsew")
 
 window.mainloop()
