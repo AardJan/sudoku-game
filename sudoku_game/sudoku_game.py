@@ -12,22 +12,22 @@ grid = []
 # TODO: fix xy position on board
 
 
-def possible(y, x, n):
+def possible(row, col, n):
     global grid
     for i in range(0, 9):
-        if grid[y][i] == n:
-            print("exists on x")
+        if grid[row][i] == n:
+            print(f"exists on column {i}")
             return False
     for i in range(0, 9):
-        if grid[i][x] == n:
-            print("exists on y")
+        if grid[i][col] == n:
+            print("exists on row x")
             return False
 
-    x0 = (x // 3) * 3
-    y0 = (y // 3) * 3
+    ts_row = (row // 3) * 3
+    ts_col = (col // 3) * 3
     for i in range(0, 3):
         for j in range(0, 3):
-            if grid[y0 + i][x0 + j] == n:
+            if grid[ts_row + i][ts_col + j] == n:
                 print("exists on small cube")
                 return False
 
@@ -36,18 +36,20 @@ def possible(y, x, n):
 
 def solve():
     global grid
-    for x in range(9):
-        for y in range(9):
-            print(f"Value field (x:{x},y:{y})={grid[x][y]}")
-            if grid[x][y] == 0:
+    for row in range(9):
+        for col in range(9):
+            print(f"Value field (row:{row},col:{col})={grid[row][col]}")
+            if grid[row][col] == 0:
                 for n in range(1, 10):
                     print(f"try insert {n}")
-                    if possible(y, x, n):
+                    if possible(row, col, n):
                         print(f"Value is possible {n}")
-                        grid[x][y] = n
+                        grid[row][col] = n
+                        print(np.matrix(grid))
                         solve()
-                        grid[x][y] = 0
-
+                        print("setup 0")
+                        grid[row][col] = 0
+                        print(np.matrix(grid))
                 return
     print(np.matrix(grid))
 
