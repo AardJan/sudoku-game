@@ -6,6 +6,7 @@ import numpy as np
 # from solve_algorithm import solve
 
 BOARD_DIM = 9
+board_fields = BOARD_DIM * BOARD_DIM
 test_f = []
 grid = []
 
@@ -14,13 +15,13 @@ grid = []
 
 def possible(row, col, n):
     global grid
-    for i in range(0, 9):
+    for i in range(0, BOARD_DIM):
         if grid[row][i] == n:
-            print(f"exists on column {i}")
+            # print(f"exists on column {i}")
             return False
-    for i in range(0, 9):
+    for i in range(0, BOARD_DIM):
         if grid[i][col] == n:
-            print("exists on row x")
+            # print("exists on row x")
             return False
 
     ts_row = (row // 3) * 3
@@ -28,7 +29,7 @@ def possible(row, col, n):
     for i in range(0, 3):
         for j in range(0, 3):
             if grid[ts_row + i][ts_col + j] == n:
-                print("exists on small cube")
+                # print("exists on small cube")
                 return False
 
     return True
@@ -36,22 +37,23 @@ def possible(row, col, n):
 
 def solve():
     global grid
-    for row in range(9):
-        for col in range(9):
-            print(f"Value field (row:{row},col:{col})={grid[row][col]}")
+    for row in range(BOARD_DIM):
+        for col in range(BOARD_DIM):
+            # print(f"Value field (row:{row},col:{col})={grid[row][col]}")
             if grid[row][col] == 0:
-                for n in range(1, 10):
-                    print(f"try insert {n}")
+                for n in range(1, BOARD_DIM + 1):
+                    # print(f"try insert {n}")
                     if possible(row, col, n):
-                        print(f"Value is possible {n}")
+                        # print(f"Value is possible {n}")
                         grid[row][col] = n
-                        print(np.matrix(grid))
+                        # print(np.matrix(grid))
                         solve()
-                        print("setup 0")
-                        grid[row][col] = 0
-                        print(np.matrix(grid))
+                        if np.count_nonzero(grid) != board_fields:
+                            # print("setup 0")
+                            grid[row][col] = 0
+                            # print(np.matrix(grid))
                 return
-    print(np.matrix(grid))
+    # print(np.matrix(grid))
 
 
 def clean_board():
@@ -66,6 +68,7 @@ def disable_board():
     grid = get_board_val_to_array(test_f)
     print(grid)
     solve()
+    print(grid)
 
 
 def validate(x):
