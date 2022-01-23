@@ -1,3 +1,4 @@
+from importlib.resources import read_binary
 import tkinter as tk
 import tkinter.filedialog as fd
 from tkinter.messagebox import showerror
@@ -9,11 +10,12 @@ WINDOW_MIN_X = 300
 WINDOW_MIN_Y = 230
 BOARD_DIM = 9
 board_fields = BOARD_DIM * BOARD_DIM
-test_f = []
+board_tk_fields = []
+
 grid = []
 org_grid = []
 
-
+# code to resolve board
 def possible(row, col, n):
     global grid
     for i in range(0, BOARD_DIM):
@@ -51,36 +53,6 @@ def solve():
                 return
 
 
-def clean_board():
-    for x in test_f:
-        x.delete(0, tk.END)
-    # TODO: clean must clean formating and numbers
-
-
-def resolve():
-    for x in test_f:
-        x.config(state="disabled")
-    global grid, org_grid
-    org_grid = get_board_val_to_array(test_f)
-    grid = copy.deepcopy(org_grid)
-    solve()
-    for x in test_f:
-        x.config(state="normal")
-    if arr_eq(grid, org_grid):
-        showerror(title="Error", message="Can't resolve this sudoku")
-    else:
-        fl_str = flat_board(grid)
-        for i, x in enumerate(test_f, start=0):
-            x.insert(0, fl_str[i])
-
-
-def field_validate(x):
-    if x == "" or (len(x) <= 1 and x.isdigit()):
-        return True
-    else:
-        return False
-
-
 def get_board_val_to_array(entry_list):
     _l = [int(x.get()) if x.get() else 0 for x in entry_list]
     arr = [x.tolist() for x in np.array_split(np.array(_l), BOARD_DIM)]
@@ -95,29 +67,60 @@ def arr_eq(list1, list2):
     return True
 
 
-def export_board():
-    f = fd.asksaveasfile(mode="w", defaultextension=".json")
-    if (
-        f is None
-    ):  # asksaveasfile return `None` if dialog closed with "cancel".
-        return
-    global grid
-    grid_json = json.dumps(grid, indent=4)
-    f.write(grid_json)
-    f.close()
+def resolve():
+    global grid, org_grid, board_tk_fields
+
+    for field in board_tk_fields:
+        field.config(state="disabled")
+
+    org_grid = get_board_val_to_array(board_tk_fields)
+    grid = copy.deepcopy(org_grid)
+
+    if not board_validate(grid):
+        showerror(title="Error", message="Can't resolve this sudoku")
+    else:
+        print("LOL2")
+        # try resolve board
+        solve()
+
+        if arr_eq(grid, org_grid):
+            showerror(title="Error", message="Can't resolve this sudoku")
+        else:
+            fl_str = flat_board(grid)
+
+            for i, field in enumerate(board_tk_fields, start=0):
+                field.insert(0, fl_str[i])
+
+    for field in board_tk_fields:
+        field.config(state="normal")
 
 
-def import_board():
-    # file type
-    filetypes = (("text files", "*.json"),)
-    # show the open file dialog
-    f = fd.askopenfile(filetypes=filetypes)
-    # read the text file and show its content on the Text
-    board = json.loads(f.read())
-    flatList_str = flat_board(board)
-    clean_board()
-    for i, x in enumerate(test_f, start=0):
-        x.insert(0, flatList_str[i])
+def field_validate(field):
+    if field == "" or (len(field) <= 1 and field.isdigit()):
+        return True
+    else:
+        return False
+
+
+def board_validate(board):
+    def _valid(row):
+        valid_num = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        for x in valid_num:
+            if row.count(x) > 1:
+                return False
+
+        return True
+
+    for row in board:
+        if _valid(row) is False:
+            return False
+
+        return True
+
+
+def clean_board():
+    for x in board_tk_fields:
+        x.delete(0, tk.END)
 
 
 def flat_board(board):
@@ -126,6 +129,29 @@ def flat_board(board):
     return fl_str
 
 
+def export_board():
+    f = fd.asksaveasfile(mode="w", defaultextension=".json")
+    if (
+        f is None
+    ):  # asksaveasfile return `None` if dialog closed with "cancel".
+        return
+    board_val = get_board_val_to_array(board_tk_fields)
+    grid_json = json.dumps(board_val, indent=4)
+    f.write(grid_json)
+    f.close()
+
+
+def import_board():
+    filetypes = (("text files", "*.json"),)
+    f = fd.askopenfile(filetypes=filetypes)
+    board = json.loads(f.read())
+    flat_board_str = flat_board(board)
+    clean_board()
+    for i, x in enumerate(board_tk_fields, start=0):
+        x.insert(0, flat_board_str[i])
+
+
+# GUI
 window = tk.Tk()
 window.title("Simple sudoku game")
 window.rowconfigure(0, minsize=50, weight=1)
@@ -156,7 +182,7 @@ for i in range(BOARD_DIM):
             validatecommand=(frm_sudoku_board.register(field_validate), "%P"),
         )
         label.grid(row=i, column=j, ipadx=4, padx=2, pady=2, sticky="nsew")
-        test_f.append(label)
+        board_tk_fields.append(label)
 
 frm_btns.grid(row=0, column=0)
 frm_sudoku_board.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
